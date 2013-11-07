@@ -3,12 +3,17 @@
 * Fungsi utama untuk menangani pengolahan data
 * @param string root parameter menu
 */
+require_once '../link/koneksi.php';
+// Konstanta nama tabel
+define('MHS', 'mahasiswa');
+ini_set('display_errors', 1);
+define('_VALID', 1);
 function data_handler($root) {
 if (isset($_GET['act']) && $_GET['act'] == 'add') {
 data_editor($root);
 return;
 }
-$sql = 'SELECT COUNT(*) AS total FROM ' . mhs;
+$sql = 'SELECT COUNT(*) AS total FROM ' . MHS;
 $res = mysql_query($sql);
 // Jika data di tabel ada
 if (mysql_num_rows($res)) {
@@ -29,18 +34,8 @@ show_admin_data($root);
 }
 break;
 case 'del':
-if (isset($_GET['id']) && ctype_digit($_GET['id'])) { ?>
-<h2 align="center">Hapus Data</h2>
-<div style="margin:auto; margin-bottom:5px; width:700px">
-<?php echo 'Apakah data berikut ini akan dihapus ?'; ?>
-</div>
-<?php data_detail($root, $_GET['id'], 1);
-// Key untuk penghapusan data
-$id = $_GET['id']; ?>
-<form action="<?php $_SERVER['PHP_SELF'];?>" method="get" style="margin:auto; margin-top:5px; width:700px">
-<input type="button" name="submit" value="Ya" onClick="data_delete($root, $id)" />
-<input type="button" value="Tidak" onClick="history.go(-1)" />
-</form><?php
+if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
+data_delete($root, $_GET['id']);
 } else {
 show_admin_data($root);
 }
@@ -49,7 +44,7 @@ default:
 show_admin_data($root);
 }
 } else {
- show_admin_data($root);
+show_admin_data($root);
 }
 @mysql_close($res);
 } else {
@@ -63,48 +58,44 @@ echo 'Data Tidak Ditemukan';
 function show_admin_data($root) { ?>
 <h2 class="heading">Administrasi Data</h2>
 <?php
-$sql = 'SELECT nim, nama, alamat FROM ' . mhs;
+$sql = 'SELECT nim, nama, alamat FROM ' . MHS;
 $res = mysql_query($sql);
 if ($res) {
 $num = mysql_num_rows($res);
 if ($num) {
 ?>
 <div class="tabel">
-<div style="padding:5px;">
-<a href="<?php echo $root;?>&amp;act=add">Tambah Data</a>
+	<div style="padding:5px;">
+	<a href="<?php echo $root;?>&amp;act=add">Tambah Data</a>
 </div>
 <table border=1 width=700 cellpadding=4 cellspacing=0>
 <tr>
-<th>#</th>
-<th width=120>NIM</th>
-<th width=200>Nama</th>
-<th width=200>Alamat</th>
-<th>Menu</th>
+	<th>#</th>
+	<th width=120>NIM</th>
+	<th width=200>Nama</th>
+	<th width=200>Alamat</th>
+	<th colspan="2">Menu</th>
 </tr>
 <?php
-$i = 1;
-while ($row = mysql_fetch_row($res)) {
-$bg = (($i % 2) != 0) ? '' : 'even';
-$id = $row[0]; ?>
-<tr class="<?php echo $bg;?>">
-<td width="2%"><?php echo $i;?></td>
-<td>
-<a href="<?php echo $root;?>&amp;act=view&amp;id=
-<?php echo $id;?>"
-title="Lihat Data"><?php echo $id;?></a>
-</td>
-<td><?php echo $row[1];?></td>
-<td><?php echo $row[2]?></td>
-<td align="center">
-| <a href="<?php echo $root;?>&amp;act=edit&amp;id=
-<?php echo $id;?>">
-Edit</a>
-| <a href="<?php echo $root;?>&amp;act=del&amp;id= <?php echo $id;?>" title="Hapus Data"> Hapus</a>
-<!--
-Lengkapi kode PHP untuk membuat link hapus data
--->
-</td>
-</tr>
+	$i = 1;
+	while ($row = mysql_fetch_row($res)) {
+	$bg = (($i % 2) != 0) ? '' : 'even';
+	$id = $row[0]; 
+?>
+	<tr class="<?php echo $bg;?>">
+	<td width="2%"><?php echo $i;?></td>
+	<td>
+		<a href="<?php echo $root;?>&amp;act=view&amp;id=
+		<?php echo $id;?>"title="Lihat Data"><?php echo $id;?></a>
+	</td>
+	<td><?php echo $row[1];?></td>
+	<td><?php echo $row[2]?></td>
+	<td align="center"> | <a href="<?php echo $root;?>&amp;act=edit&amp;id=
+	<?php echo $id;?>">Edit</a> |
+	<td align="center"> | <a href="<?php echo $root;?>&amp;act=del&amp;id=
+	<?php echo $id;?>" onclick="return confirm('Apakah anda yakin akan menghapus data ini?')">Hapus</a> |
+	</td>
+	</tr>
 <?php
 $i++;
 }
@@ -126,7 +117,7 @@ isi <a href="'.$root.'&amp;act=add">di sini</a>';
 */
 function data_detail($root, $id) {
 $sql = 'SELECT nim, nama, alamat
-FROM ' . mhs .
+FROM ' . MHS .
 ' WHERE nim=' . $id;
 $res = mysql_query($sql);
 if ($res) {
@@ -163,14 +154,14 @@ echo 'Data Tidak Ditemukan';
 */
 function data_editor($root, $id = 0) {
 $view = true;
-if (isset($_POST['nim']) && $_POST['nim'] ) {
-// Jika tidak disertai id, berarti insert baru
+if (isset($_POST['nim']) && $_POST['nama'] ) {
+$nim = $_POST['nim'];
+$nama = $_POST['nama'];
+$alamat = $_POST['alamat'];
 if (!$id) {
 // Lengkapi Pernyataan PHP SQL untuk INSERT data
-$nim = @$_POST['nim'];
-$nama = @$_POST['nama'];
-$alamat = @$_POST['alamat'];
-$sql = "INSERT INTO " . mhs . " (nim, nama, alamat) VALUES ('" .$nim. "', '" .$nama. "', '" .$alamat. "' )";
+$sql = "INSERT INTO mahasiswa
+VALUES ('" .$nim. "', '" .$nama. "', '" .$alamat. "' )";
 $res = mysql_query($sql);
 if ($res) { ?>
 <script type="text/javascript">
@@ -181,17 +172,14 @@ document.location.href="<?php echo $root;?>";
 echo 'Gagal menambah data';
 }
 } else {
-$nim = @$_POST['nim'];
-$nama = @$_POST['nama'];
-$alamat = @$_POST['alamat'];
-
-$sql = "UPDATE " . mhs . " SET nim = '" .$nim. "', nama = '" .$nama. "', alamat = '" .$alamat. "' WHERE nim = " . $id;
-
+// Lengkapi Pernyataan PHP SQL untuk UPDATE data
+$sql = "UPDATE " . MHS . " SET nim = '" .$nim. "', nama = '" .$nama. "', alamat = '" .$alamat. "' WHERE nim = " . $id;
 $res = mysql_query($sql);
 if ($res) { ?>
 <script type="text/javascript">
 document.location.href="<?php echo $root;?>";
-</script><?php
+</script>
+<?php
 } else {
 echo 'Gagal memodifikasi';
 }
@@ -200,7 +188,7 @@ echo 'Gagal memodifikasi';
 // Menyiapkan data untuk updating
 if ($view) {
 if ($id) {
-$sql = 'SELECT nim, nama, alamat FROM ' . mhs .
+$sql = 'SELECT nim, nama, alamat FROM ' . MHS .
 ' WHERE nim=' . $id;
 $res = mysql_query($sql);
 if ($res) {
@@ -251,15 +239,12 @@ onclick="history.go(-1)" /></td>
 }
 return false;
 }
-// Fungsi untuk menghasilkan form menghapus @param string root parameter menu @param integer id nim mahasiswa
 function data_delete($root, $id) {
 if (isset($_GET['id']) && $_GET['id']) {
 // Pernyataan SQL hapus data
-
-$sql = "DELETE FROM " . mhs . " WHERE nim =" . $id;
+$sql = "DELETE FROM " . MHS . " WHERE nim =" . $id;
 @$res = mysql_query($sql);
 if ($res) {
-// Script untuk redireksi ke root
 ?>
 <script type="text/javascript">
 document.location.href="<?php echo $root;?>";
@@ -271,3 +256,4 @@ echo 'Gagal menghapus data';
 @mysql_close($res);
 }
 }
+data_handler('?m=data');?>
