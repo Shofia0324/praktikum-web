@@ -1,0 +1,40 @@
+<HTML>
+<HEAD>
+<TITLE> PRAKTIKUM KE-4 : OPERASI ARITMATIKA </TITLE> </HEAD>
+<BODY>
+<form action = "<?php $_SERVER['PHP_SELF'];?>" method = "POST">
+<input type = "text" name="angka1" />
+<select name = "operator">
+<option value = "add"> +
+<option value = "minus"> -
+<option value = "multiple"> x
+<option value = "divide"> /
+</select>
+<input type = "text" name="angka2" />
+<input type = "submit" value="=" />
+</form>
+<form>
+<?php
+$angka1 = $_POST ['angka1'];
+$angka2 = $_POST ['angka2'];
+// $operator = $_POST ['operator'];
+if (isset ($_POST[operator]));
+if $oprator = 'add'{
+$hasil = $angka1 + $angka2;
+}
+if $oprator = 'minus'{
+$hasil = $angka1 - $angka2;
+}
+if $oprator = 'multiple'{
+$hasil = $angka1 * $angka2;
+}
+if $oprator = 'divide'{
+$hasil = $angka1 / $angka2;
+}
+<input type = "text" name="hasil" value= "<?php echo @$_POST[$hasil]; ?> "/>
+
+
+}
+?>
+</BODY>
+</HTML>
